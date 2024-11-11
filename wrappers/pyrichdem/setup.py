@@ -12,7 +12,7 @@ richdem_git_hash: Optional[str] = None
 
 # Compiler specific arguments
 BUILD_ARGS = {
-    "msvc": ["-std=c++17", "-g", "-fvisibility=hidden", "-O3"],
+    "msvc": ["/std:c++17", "/O2"],
     "gcc": ["-std=c++17", "-g", "-fvisibility=hidden", "-O3", "-Wno-unknown-pragmas"],
     "unix": ["-std=c++17", "-g", "-fvisibility=hidden", "-O3", "-Wno-unknown-pragmas"],
 }
@@ -72,8 +72,8 @@ print("Using RichDEM hash={0}, time={1}".format(richdem_git_hash, richdem_compil
 ext_modules = [
     Pybind11Extension(
         "_richdem",
-        ["src/pywrapper.cpp"] + list(glob.glob("lib/richdem/src/**/*.cpp", recursive=True)),
-        include_dirs=["lib/richdem/include"],
+        ["src/pywrapper.cpp"] + list(glob.glob("../../src/**/*.cpp", recursive=True)),
+        include_dirs=["../../include"],
         define_macros=[
             ("DOCTEST_CONFIG_DISABLE", None),
             ("RICHDEM_COMPILE_TIME", f'"\\"{richdem_compile_time}\\""'),

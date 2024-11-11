@@ -4,7 +4,7 @@
 #include <richdem/flats/flats.hpp>
 #include <richdem/methods/flow_accumulation.hpp>
 #include <richdem/methods/terrain_attributes.hpp>
-#include <richdem/terrain_generation.hpp>
+// #include <richdem/terrain_generation.hpp>
 
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>

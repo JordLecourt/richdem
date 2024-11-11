@@ -12,6 +12,53 @@
 #include <vector>
 #include <tuple>
 
+#include <intrin.h>  // For MSVC intrinsics
+
+#ifdef _MSC_VER
+// Replacement for __builtin_clz and __builtin_clzll
+inline int builtin_clz(unsigned int x) {
+    unsigned long leading_zero = 0;
+    if (_BitScanReverse(&leading_zero, x)) {
+        return 31 - leading_zero;
+    } else {
+        return 32;  // All bits are zero
+    }
+}
+
+inline int builtin_clzll(unsigned long long x) {
+    unsigned long leading_zero = 0;
+    if (_BitScanReverse64(&leading_zero, x)) {
+        return 63 - leading_zero;
+    } else {
+        return 64;  // All bits are zero
+    }
+}
+
+inline int builtin_ffs(int x) {
+    unsigned long index;
+    if (_BitScanForward(&index, x)) {
+        return static_cast<int>(index + 1); // ffs is 1-based
+    } else {
+        return 0;  // No bits are set
+    }
+}
+
+inline int builtin_ffsll(long long x) {
+    unsigned long index;
+    if (_BitScanForward64(&index, x)) {
+        return static_cast<int>(index + 1); // ffsll is 1-based
+    } else {
+        return 0;  // No bits are set
+    }
+}
+
+#else
+#define builtin_clz __builtin_clz
+#define builtin_clzll __builtin_clzll
+#define builtin_ffs __builtin_ffs
+#define builtin_ffsll __builtin_ffsll
+#endif
+
 namespace radix_heap {
 namespace internal {
 template<bool Is64bit> class find_bucket_impl;
@@ -20,7 +67,7 @@ template<>
 class find_bucket_impl<false> {
  public:
   static inline constexpr size_t find_bucket(uint32_t x, uint32_t last) {
-    return x == last ? 0 : 32 - __builtin_clz(x ^ last);
+    return x == last ? 0 : 32 - builtin_clz(x ^ last);
   }
 };
 
@@ -28,7 +75,7 @@ template<>
 class find_bucket_impl<true> {
  public:
   static inline constexpr size_t find_bucket(uint64_t x, uint64_t last) {
-    return x == last ? 0 : 64 - __builtin_clzll(x ^ last);
+    return x == last ? 0 : 64 - builtin_clzll(x ^ last);
   }
 };
 
@@ -134,9 +181,9 @@ class bucket_flags {
 
   size_t find_first_non_empty() const {
     if (sizeof(flags_) == 8)
-      return __builtin_ffsll(flags_);
+      return builtin_ffsll(flags_);
 
-    return __builtin_ffs(flags_);
+    return builtin_ffs(flags_);
   }
 
   void swap(bucket_flags& a) {
